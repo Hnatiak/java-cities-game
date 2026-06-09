@@ -11,6 +11,16 @@ public class GameEngine {
 
     private int score = 0;
 
+    private static final Set<Character> SKIPPED_LETTERS =
+        Set.of(
+                'ь',
+                'й',
+                'ъ',
+                'ы',
+                'и',
+                '-'
+        );
+
     public GameEngine() {
         this.cities = new ArrayList<>(CityRepository.getCities());
     }
@@ -22,13 +32,13 @@ public class GameEngine {
         String normalizedPlayerCity = findCity(playerCity);
 
         if (normalizedPlayerCity == null) {
-            throw new IllegalArgumentException(
+            throw new InvalidCityException(
                     "Такого міста не існує"
             );
         }
 
         if (usedCities.contains(normalizedPlayerCity)) {
-            throw new IllegalArgumentException(
+            throw new InvalidCityException(
                     "Вказане місто вже було зазначене раніше"
             );
         }
@@ -42,7 +52,7 @@ public class GameEngine {
                     normalizedPlayerCity.charAt(0))
                     != requiredLetter) {
 
-                throw new IllegalArgumentException(
+                throw new InvalidCityException(
                         "Місто повинно починатися на букву "
                                 + Character.toUpperCase(requiredLetter)
                 );
@@ -100,17 +110,12 @@ public class GameEngine {
 
             char ch = city.charAt(i);
 
-            if (ch != 'ь'
-                    && ch != 'й'
-                    && ch != 'ъ'
-                    && ch != 'ы'
-                    && ch != 'и'
-                    && ch != '-') {
+            if (!SKIPPED_LETTERS.contains(ch)) {
                 return ch;
             }
         }
 
-        throw new IllegalArgumentException(
+        throw new InvalidCityException(
                 "Некоректна назва міста"
         );
     }

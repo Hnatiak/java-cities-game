@@ -10,7 +10,24 @@ public class GameFrame extends JFrame {
     private final GameEngine gameEngine =
             new GameEngine();
 
+    private JTextField input;
+
+    private JLabel answer;
+
+    private JButton button;
+
     public GameFrame() {
+
+        initializeFrame();
+
+        initializeComponents();
+
+        registerListeners();
+
+        setVisible(true);
+    }
+
+    private void initializeFrame() {
 
         ImageIcon icon =
                 new ImageIcon(
@@ -27,30 +44,67 @@ public class GameFrame extends JFrame {
 
         setLayout(new FlowLayout());
 
-        JTextField input =
-                new JTextField(20);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+    }
 
-        JLabel answer =
-                new JLabel("Введіть місто");
+    private void initializeComponents() {
 
-        JButton button =
-                new JButton("Зробити хід");
+        input = new JTextField(20);
+
+        answer = new JLabel("Введіть місто");
+
+        button = new JButton("Зробити хід");
 
         add(input);
+
         add(button);
+
         add(answer);
+    }
 
-        button.addActionListener(e -> {
+    private void registerListeners() {
 
-            String city = input.getText().trim();
+        button.addActionListener(
+                e -> processMove()
+        );
+    }
 
-            if ("здаюсь".equalsIgnoreCase(city)) {
+    private void processMove() {
+
+        String city = input.getText().trim();
+
+        if ("здаюсь".equalsIgnoreCase(city)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "🏆 Комп'ютер переміг!\n\n" +
+                            "Ваш рахунок: " +
+                            gameEngine.getScore()
+            );
+
+            dispose();
+
+            return;
+        }
+
+        try {
+
+            String result =
+                    gameEngine.makeMove(city);
+
+            if (result == null) {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "🏆 Комп'ютер переміг!\n\n" +
+                        "🏆 Ви перемогли!\n\n" +
                                 "Ваш рахунок: " +
-                                gameEngine.getScore()
+                                gameEngine.getScore() +
+                                "\n\n" +
+                                "У грі було використано " +
+                                gameEngine.getUsedCitiesCount() +
+                                " з 461 різних міст.\n\n" +
+                                "Комп'ютер вичерпав усі доступні варіанти відповіді.\n" +
+                                "Дякуємо вам за гру!"
                 );
 
                 dispose();
@@ -58,48 +112,20 @@ public class GameFrame extends JFrame {
                 return;
             }
 
-            try {
+            answer.setText(
+                    "Комп'ютер: " + result
+            );
 
-                String result =
-                        gameEngine.makeMove(city);
+            input.setText("");
 
-                if (result == null) {
+        } catch (RuntimeException ex) {
 
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "🏆 Ви перемогли!\n\n" +
-                                    "Ваш рахунок: " +
-                                    gameEngine.getScore() +
-                                    "\n\n" +
-                                    "У грі було використано " +
-                                    gameEngine.getUsedCitiesCount() +
-                                    " з 461 різних міст.\n\n" +
-                                    "Комп'ютер вичерпав усі доступні варіанти відповіді. Та ви геній!\n" +
-                                    "Дякуємо вам за гру!"
-                    );
-
-                    dispose();
-
-                    return;
-                }
-
-                answer.setText("Комп'ютер: " + result);
-
-                input.setText("");
-
-            } catch (IllegalArgumentException ex) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        ex.getMessage(),
-                        "Помилка",
-                        JOptionPane.WARNING_MESSAGE
-                );
-            }
-        });
-
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        setVisible(true);
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Помилка",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
     }
 }
